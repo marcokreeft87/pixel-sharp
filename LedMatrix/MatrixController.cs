@@ -1,5 +1,8 @@
+using Microsoft.AspNetCore.Mvc;
+using rpi_rgb_led_matrix_sharp;
+using Color = rpi_rgb_led_matrix_sharp.Color;
 
-public class MatrixController
+public class MatrixController : Controller
 {
     private int _ledRows;
     private int _ledColumns;
@@ -15,46 +18,43 @@ public class MatrixController
         _ledColumns = pixelDisplaySettings.LedColumns;
     }
 
-    // https://static.wikia.nocookie.net/pure-good-wiki/images/3/3e/MPSS_Mario.png
-    public void DisplayImageWithDownload(string imageUrl)
+    [HttpGet("matrix/render")]
+    public async Task<string> RenderImage([FromQuery] string imageUrl) 
     {
-        var command = $@"wget -O ../rpi-rgb-led-matrix/utils/image.png {imageUrl}";
-        var result = "";
-        using (System.Diagnostics.Process proc = new System.Diagnostics.Process())
+        // Initialize the LED matrix display
+        var options = new RGBLedMatrixOptions() 
         {
-            proc.StartInfo.FileName = "/bin/bash";
-            proc.StartInfo.Arguments = "-c \" " + command + " \"";
-            proc.StartInfo.UseShellExecute = false;
-            proc.StartInfo.RedirectStandardOutput = true;
-            proc.StartInfo.RedirectStandardError = true;
-            proc.Start();
+            Rows = _ledRows,
+            Cols = _ledColumns,
+            ChainLength = 1,
+            Parallel = 1,
+            GpioSlowdown = 4,
+        };
 
-            result += proc.StandardOutput.ReadToEnd();
-            result += proc.StandardError.ReadToEnd();
+        var matrix = new RGBLedMatrix(options);
+        var canvas = matrix.CreateOffscreenCanvas();
+        canvas.Clear();
+        
+        var bitmap = await BitmapHelper.GetBitmap(imageUrl, _ledColumns, _ledRows);
 
-            proc.WaitForExit();
+        // Loop through the pixels of the image and set the corresponding pixel in the RGBLedMatrix canvas
+        var xOffset = (canvas.Width - bitmap.Width) / 2;
+        var yOffset = (canvas.Height - bitmap.Height) / 2;
+
+        // Loop through the pixels of the image and set the corresponding pixel in the RGBLedMatrix canvas
+        for (var y = 0; y < bitmap.Height; ++y)
+        {
+            for (var x = 0; x < bitmap.Width; ++x)
+            {
+                var pixel = bitmap.GetPixel(x, y);
+
+                canvas.SetPixel(x + xOffset, y + yOffset, new Color(pixel.Red, pixel.Green, pixel.Blue));
+            }
         }
 
-        DisplayImage("../rpi-rgb-led-matrix/utils/image.png");
-    }
-
-    public void DisplayImage(string imageUrl = @"../rpi-rgb-led-matrix/utils/1442802_amni3d_3d-among-us-gifs.gif\?f1601359412")
-    {
-        var command = $@"sudo ../rpi-rgb-led-matrix/utils/./led-image-viewer --led-rows={_ledRows} --led-cols={_ledColumns} {imageUrl}";
-        var result = "";
-        using (System.Diagnostics.Process proc = new System.Diagnostics.Process())
-        {
-            proc.StartInfo.FileName = "/bin/bash";
-            proc.StartInfo.Arguments = "-c \" " + command + " \"";
-            proc.StartInfo.UseShellExecute = false;
-            proc.StartInfo.RedirectStandardOutput = true;
-            proc.StartInfo.RedirectStandardError = true;
-            proc.Start();
-
-            result += proc.StandardOutput.ReadToEnd();
-            result += proc.StandardError.ReadToEnd();
-
-            proc.WaitForExit();
-        }
+        // Swap the canvas on the next vertical sync to display the image
+        canvas = matrix.SwapOnVsync(canvas);
+        
+        return "Image rendered";
     }
 }
