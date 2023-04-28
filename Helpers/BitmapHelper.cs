@@ -2,7 +2,14 @@ using SkiaSharp;
 
 public static class BitmapHelper 
 {
-    public static async Task<SKBitmap> GetBitmap(string url, int screenWidth, int screenHeight)
+    public static SKBitmap GetBitmapFromPath(string path, int screenWidth, int screenHeight)
+    {
+        var bitmap = SKBitmap.Decode(path);
+
+        return ResizeBitmap(screenWidth, screenHeight, bitmap);
+    }
+
+    public static async Task<SKBitmap> GetBitmapFromUrl(string url, int screenWidth, int screenHeight)
     {
         using var client = new HttpClient();
         using var response = await client.GetAsync(url);
@@ -10,6 +17,11 @@ public static class BitmapHelper
 
         var bitmap = SKBitmap.Decode(stream);
 
+        return ResizeBitmap(screenWidth, screenHeight, bitmap);
+    }    
+
+    private static SKBitmap ResizeBitmap(int screenWidth, int screenHeight, SKBitmap bitmap)
+    {
         int targetWidth, targetHeight;
         CalculateDimensions(bitmap, screenWidth, screenHeight, out targetWidth, out targetHeight);
 

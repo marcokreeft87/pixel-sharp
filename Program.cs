@@ -2,6 +2,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 builder.Services.AddControllers();
+builder.Services.AddHostedService<SplashScreenService>();
 
 var app = builder.Build();
 
