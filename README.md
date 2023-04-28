@@ -1,4 +1,4 @@
-# pixel-display-api
+# PixelSharp
 
 ## Hardware
 1. A Raspberry Pi
