@@ -1,4 +1,4 @@
-# pixel-display-api
+# PixelSharp
 
 ## Hardware
 1. A Raspberry Pi
@@ -14,3 +14,11 @@ The colors of the columns are the colors of the rainbow cable.
 ```
 wget -O - https://raw.githubusercontent.com/pjgpetecodes/dotnet7pi/main/install.sh | sudo bash
 ```
+
+
+## TODO
+- [ ] Support for gif
+- [ ] Support for video
+- [ ] Support for text
+- [ ] Boot screen
+- [ ] MQTT support for Home Assistant integration
