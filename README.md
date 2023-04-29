@@ -26,3 +26,36 @@ wget -O - https://raw.githubusercontent.com/pjgpetecodes/dotnet7pi/main/install.
 - [x] Boot screen
 - [ ] Clock
 - [ ] Way to send whole screen
+
+```
+[{
+  start: { 
+    x: 10,
+    y: 20
+  },
+  end: {
+    x: 30,
+    y: 50
+  },
+  graphic: {
+    type: text,
+    content: 'Hello'
+  }
+},
+{
+
+  start: { 
+    x: 10,
+    y: 20
+  },
+  end: {
+    x: 30,
+    y: 50
+  },
+  graphic: {
+    type: image,
+    content: 'http://'
+  }
+}]
+
+```
