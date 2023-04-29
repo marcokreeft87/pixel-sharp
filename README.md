@@ -24,4 +24,5 @@ wget -O - https://raw.githubusercontent.com/pjgpetecodes/dotnet7pi/main/install.
 - [ ] Support for video
 - [x] Support for text
 - [x] Boot screen
-- [ ] MQTT support for Home Assistant integration
+- [ ] Clock
+- [ ] Way to send whole screen
