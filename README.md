@@ -1,5 +1,8 @@
 # PixelSharp
 
+![pixelsharp](https://user-images.githubusercontent.com/10223677/235302181-3d1b693b-c611-4f31-b731-b0231c2d91fc.PNG)
+
+
 ## Hardware
 1. A Raspberry Pi
 2. A Pixel Display. I used [this display](https://www.amazon.nl/dp/B0B3GQD3JM?ref=ppx_yo2ov_dt_b_product_details&th=1)
