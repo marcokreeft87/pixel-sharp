@@ -1,20 +1,18 @@
 public class SplashScreenService : IHostedService
-{
-    private int _ledRows;
-    private int _ledColumns;
+{    private IPixelSharpMatrix _matrix;
 
-    public SplashScreenService(IConfiguration configuration)
+    public SplashScreenService(IPixelSharpMatrix matrix)
     {
-        (_ledRows, _ledColumns) = MatrixHelper.GetDimensionsFromConfiguration(configuration);
+        _matrix = matrix;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        MatrixHelper.ShowLogo(_ledRows, _ledColumns);
+        _matrix.ShowLogo();
 
         Thread.Sleep(2000);
 
-        // TODO - Show text "Waiting for commands"
+        _matrix.ScrollText("Awaiting your command...", cancellationToken);
         
         await Task.CompletedTask;
     }

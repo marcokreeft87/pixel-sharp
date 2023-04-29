@@ -4,20 +4,13 @@ builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnCh
 builder.Services.AddControllers();
 builder.Services.AddHostedService<SplashScreenService>();
 
+builder.Services.AddSingleton<IPixelSharpMatrix, PixelSharpMatrix>();
+
 var app = builder.Build();
 
 app.MapGet("/", () =>  { 
     return "Hello World!";
 });
-
-// app.MapGet("/render", async (string imageUrl) =>  { 
-//     return await new MatrixController(app.Configuration).RenderImage(imageUrl);
-// });
-
-// app.MapGet("/image", (string imageUrl) =>  { 
-//     new PythonController(app.Configuration).DisplayImageWithDownload(imageUrl);
-//     return $"Image {imageUrl} downloaded and displayed";
-// });
 
 app.MapControllers();
 
