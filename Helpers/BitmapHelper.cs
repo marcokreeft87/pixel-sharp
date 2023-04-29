@@ -20,34 +20,40 @@ public static class GraphicsHelper
         return ResizeBitmap(screenWidth, screenHeight, bitmap);
     }  
 
-    public static async Task<SKCodec> GetGifFromUrl(string url, int screenWidth, int screenHeight)
+    public static (List<SKBitmap> frames, List<int> durations) GetGifFromUrl(string url, int screenWidth, int screenHeight)
     {
         using var client = new HttpClient();
-        using var response = await client.GetAsync(url);
-        using var stream = await response.Content.ReadAsStreamAsync();
+        using var response = client.GetAsync(url).Result.Content.ReadAsStream();
+        using (var codec = SKCodec.Create(response))
+        {
+            var frameCount = codec.FrameCount;
+            Console.WriteLine($"Frame count: {codec.FrameCount}");
 
-        return SKCodec.Create(stream);
+            var info = codec.Info;
+            var count = codec.FrameCount;
 
-        // codec = SKCodec.Create(stream);
+            // Get all frames from gif and duration and add to list
+            var bitmap = new SKBitmap(info);
+            var frames = new List<SKBitmap>();
+            var frameLengths = new List<int>();
 
-        // codec.Getpi
-        // if (codec.FrameCount == 0)
-        // {
-        //     // Error handling: the GIF has no frames
-        //     return new List<SKBitmap>();
-        // }
+            for (int i = 0; i < count; i++)
+            {   
+                var opts = new SKCodecOptions(i);
 
-        // var frameCount = codec.FrameCount;
-        // var frames = new List<SKBitmap>();
+                if (codec?.GetPixels(info, bitmap.GetPixels(), opts) == SKCodecResult.Success)
+                {
+                    bitmap.NotifyPixelsChanged();
 
-        // for (int i = 0; i < codec.FrameCount; i++)
-        // {
-        //     var frame = codec.DecodeFrame(i);
-        //     var resized = ResizeBitmap(screenWidth, screenHeight, frame);
-        //     frames.Add(resized);
-        // }
+                    var resized = ResizeBitmap(screenWidth, screenHeight, bitmap);
 
-        // return frames;
+                    frames.Add(resized);
+                    frameLengths.Add(codec.FrameInfo[i].Duration);
+                }
+            }
+            
+            return (frames, frameLengths);
+        }
     }  
 
     private static SKBitmap ResizeBitmap(int screenWidth, int screenHeight, SKBitmap bitmap)

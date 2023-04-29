@@ -7,7 +7,7 @@ public class MatrixController : Controller
     public MatrixController(IPixelSharpMatrix matrix) => _matrix = matrix;
 
     [HttpGet("matrix/gif")]
-    public void RenderGif([FromQuery] string imageUrl) => _matrix.DrawGifFromUrl(imageUrl);
+    public void RenderGif([FromQuery] string imageUrl, CancellationToken cancellationToken) => _matrix.DrawGifFromUrl(imageUrl, cancellationToken);
 
     [HttpGet("matrix/image")]
     public void RenderImage([FromQuery] string imageUrl) => _matrix.DrawBitmapFromUrl(imageUrl);

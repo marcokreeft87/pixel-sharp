@@ -7,5 +7,5 @@ public interface IPixelSharpMatrix
     void DrawText(string text, CancellationToken cancellationToken);
     void ScrollText(string text, CancellationToken cancellationToken);
     void DrawBitmapFromUrl(string imageUrl);
-    void DrawGifFromUrl(string imageUrl);
+    void DrawGifFromUrl(string imageUrl, CancellationToken cancellationToken);
 }
