@@ -1,6 +1,6 @@
 using SkiaSharp;
 
-public static class BitmapHelper 
+public static class GraphicsHelper 
 {
     public static SKBitmap GetBitmapFromPath(string path, int screenWidth, int screenHeight)
     {
@@ -18,7 +18,37 @@ public static class BitmapHelper
         var bitmap = SKBitmap.Decode(stream);
 
         return ResizeBitmap(screenWidth, screenHeight, bitmap);
-    }    
+    }  
+
+    public static async Task<SKCodec> GetGifFromUrl(string url, int screenWidth, int screenHeight)
+    {
+        using var client = new HttpClient();
+        using var response = await client.GetAsync(url);
+        using var stream = await response.Content.ReadAsStreamAsync();
+
+        return SKCodec.Create(stream);
+
+        // codec = SKCodec.Create(stream);
+
+        // codec.Getpi
+        // if (codec.FrameCount == 0)
+        // {
+        //     // Error handling: the GIF has no frames
+        //     return new List<SKBitmap>();
+        // }
+
+        // var frameCount = codec.FrameCount;
+        // var frames = new List<SKBitmap>();
+
+        // for (int i = 0; i < codec.FrameCount; i++)
+        // {
+        //     var frame = codec.DecodeFrame(i);
+        //     var resized = ResizeBitmap(screenWidth, screenHeight, frame);
+        //     frames.Add(resized);
+        // }
+
+        // return frames;
+    }  
 
     private static SKBitmap ResizeBitmap(int screenWidth, int screenHeight, SKBitmap bitmap)
     {

@@ -8,11 +8,11 @@ public class SplashScreenService : IHostedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        _matrix.ShowLogo();
+        _matrix.DrawLogo();
 
         Thread.Sleep(2000);
 
-        _matrix.ScrollText("Awaiting your command...", cancellationToken);
+        //_matrix.ScrollText("Awaiting your command...", cancellationToken);
         
         await Task.CompletedTask;
     }
