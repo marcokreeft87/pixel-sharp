@@ -24,6 +24,7 @@ wget -O - https://raw.githubusercontent.com/pjgpetecodes/dotnet7pi/main/install.
 - [x] Support for text
 - [x] Boot screen
 - [ ] Clock
+- [ ] Weather
 - [ ] RenderRequest lowercase
 - [x] Pass pixels in a render section
 - [ ] Gif support for render section
