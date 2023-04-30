@@ -21,41 +21,10 @@ wget -O - https://raw.githubusercontent.com/pjgpetecodes/dotnet7pi/main/install.
 
 ## TODO
 - [x] Support for gif
-- [ ] Support for video
 - [x] Support for text
 - [x] Boot screen
 - [ ] Clock
-- [ ] Way to send whole screen
-
-```
-[{
-  start: { 
-    x: 10,
-    y: 20
-  },
-  end: {
-    x: 30,
-    y: 50
-  },
-  graphic: {
-    type: text,
-    content: 'Hello'
-  }
-},
-{
-
-  start: { 
-    x: 10,
-    y: 20
-  },
-  end: {
-    x: 30,
-    y: 50
-  },
-  graphic: {
-    type: image,
-    content: 'http://'
-  }
-}]
-
-```
+- [ ] RenderRequest lowercase
+- [ ] Pass pixels in a render section
+- [ ] Gif support for render section
+- [ ] Add image/gif base64 support for render and image endpoint
