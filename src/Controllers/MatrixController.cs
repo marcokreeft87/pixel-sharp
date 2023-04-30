@@ -94,7 +94,7 @@ public class MatrixController : Controller
             // If not, return a 400 Bad Request
             Response.StatusCode = 400;
             Response.WriteAsync($"The request must be {_matrix.Width}x{_matrix.Height}.");
-            return null;
+            return string.Empty;
         }
 
         // Render the request

@@ -22,53 +22,49 @@ public class PixelSharpMatrix : IPixelSharpMatrix
     {
         var canvas = _matrix.CreateOffscreenCanvas();
 
-        if(request.Sections == null || request.Sections.Length == 0)
+        if (request.Sections == null || request.Sections.Length == 0)
         {
             throw new ArgumentException("The request must have at least one section.");
         }
 
-        foreach(var section in request.Sections)
+        foreach (var section in request.Sections)
         {
             Console.WriteLine($"Section: {JsonConvert.SerializeObject(section)}");
+            if(section.Start == null || section.End == null)
+            {
+                throw new ArgumentException("The section must have a start and end point.");
+            }
 
             var graphic = section.Graphic;
-            if((graphic == null || (string.IsNullOrWhiteSpace(graphic.Content) && graphic.Pixels == null)))
+            if ((graphic == null || (string.IsNullOrWhiteSpace(graphic.Content) && graphic.Pixels == null)))
             {
                 throw new ArgumentException("The section must have a graphic and content or have pixels.");
             }
 
-            switch(graphic.Type)
+            switch (graphic.Type)
             {
-                case GraphicType.Pixels:                
+                case GraphicType.Pixels:
                     canvas = DrawPixelsOnCanvas(canvas, graphic.Pixels, section.Start, section.End);
                     break;
-                case GraphicType.Text:                
-                    canvas = DrawTextOnCanvas(canvas, graphic.Content, section.Start, section.End);
+                case GraphicType.Text:
+                    if(!string.IsNullOrEmpty(graphic.Content))
+                    {
+                        canvas = DrawTextOnCanvas(canvas, graphic.Content, section.Start, section.End);
+                    }
                     break;
                 case GraphicType.Image:
-                    canvas = DrawBitmapOnCanvas(canvas, graphic.Content, section.Start, section.End);
+                    if(!string.IsNullOrEmpty(graphic.Content))
+                    {
+                        canvas = DrawBitmapOnCanvas(canvas, graphic.Content, section.Start, section.End);
+                    }
                     break;
-                case GraphicType.Gif:
-                    throw new NotImplementedException();
             }
         }
 
+        // Draw the gif section last because of the animation
+        canvas = DrawGifSection(request, canvas, cancellationToken);
+
         canvas = SwapCanvas(canvas);
-    }
-
-    private RGBLedCanvas DrawPixelsOnCanvas(RGBLedCanvas canvas, RenderPixel[]? pixels, RenderPoint? start, RenderPoint? end)
-    {
-        if(pixels == null || pixels.Length == 0)
-        {
-            throw new ArgumentException("The section must have at least one pixel.");
-        }
-
-        foreach(var pixel in pixels)
-        {
-            canvas.SetPixel(pixel.X, pixel.Y, new Color(pixel.R, pixel.G, pixel.B));
-        }
-
-        return canvas;
     }
 
     public void DrawText(string text, CancellationToken cancellationToken)
@@ -119,20 +115,7 @@ public class PixelSharpMatrix : IPixelSharpMatrix
     {
         var canvas = _matrix.CreateOffscreenCanvas();
 
-        (List<SKBitmap> frames, List<int> durations) = GraphicsHelper.GetGifFromUrl(imageUrl, _ledRows, _ledColumns);
-
-        while(!cancellationToken.IsCancellationRequested)
-        {
-            for(var i = 0; i < frames.Count; i++)
-            {
-                canvas = DrawBitmapOnCanvas(canvas, frames[i]);
-                canvas = SwapCanvas(canvas);
-
-                Thread.Sleep(durations[i]);
-            }
-
-            // TODO remove frame skip after last frame
-        }
+        canvas = DrawGifOnCanvas(canvas, imageUrl, new RenderPoint(0, 0), new RenderPoint(_ledRows, _ledColumns), cancellationToken);
     }
 
     public void DrawBitmapFromUrl(string imageUrl)
@@ -160,6 +143,69 @@ public class PixelSharpMatrix : IPixelSharpMatrix
     {
         canvas = _matrix.SwapOnVsync(canvas);
         canvas.Clear();
+
+        return canvas;
+    }
+
+    private RGBLedCanvas DrawGifSection(RenderRequest request, RGBLedCanvas canvas, CancellationToken cancellationToken)
+    {
+        var gifSections = request?.Sections?.Where(s => s.Graphic?.Type == GraphicType.Gif);
+        if (gifSections != null && gifSections.Any())
+        {
+            if (gifSections.Count() > 1)
+            {
+                throw new ArgumentException("The request can only have one gif section.");
+            }
+
+            var gifSection = gifSections.FirstOrDefault();
+            if(gifSection == null || gifSection.Start == null || gifSection.End == null)
+            {
+                throw new ArgumentException("The section must have a start and end point.");
+            }
+
+            var graphic = gifSection.Graphic;
+            if ((graphic == null || string.IsNullOrWhiteSpace(graphic.Content)))
+            {
+                throw new ArgumentException("The section must have a graphic and content or have pixels.");
+            }
+
+            canvas = DrawGifOnCanvas(canvas, graphic.Content, gifSection.Start, gifSection.End, cancellationToken);
+        }
+
+        return canvas;
+    }
+
+    private RGBLedCanvas DrawGifOnCanvas(RGBLedCanvas canvas, string imageUrl, RenderPoint start, RenderPoint end, CancellationToken cancellationToken)
+    {
+        (List<SKBitmap> frames, List<int> durations) = GraphicsHelper.GetGifFromUrl(imageUrl, end.Y - start.Y, end.X - start.X);
+
+        while(!cancellationToken.IsCancellationRequested)
+        {
+            for(var i = 0; i < frames.Count; i++)
+            {
+                canvas = DrawBitmapOnCanvas(canvas, frames[i]);
+                canvas = SwapCanvas(canvas);
+
+                Thread.Sleep(durations[i]);
+            }
+
+            // TODO remove frame skip after last frame
+        }
+
+        return canvas;
+    }
+
+    private RGBLedCanvas DrawPixelsOnCanvas(RGBLedCanvas canvas, RenderPixel[]? pixels, RenderPoint? start, RenderPoint? end)
+    {
+        if(pixels == null || pixels.Length == 0)
+        {
+            throw new ArgumentException("The section must have at least one pixel.");
+        }
+
+        foreach(var pixel in pixels)
+        {
+            canvas.SetPixel(pixel.X, pixel.Y, new Color(pixel.R, pixel.G, pixel.B));
+        }
 
         return canvas;
     }
