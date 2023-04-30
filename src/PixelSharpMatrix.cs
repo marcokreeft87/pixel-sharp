@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using rpi_rgb_led_matrix_sharp;
 using SkiaSharp;
 
@@ -28,15 +29,20 @@ public class PixelSharpMatrix : IPixelSharpMatrix
 
         foreach(var section in request.Sections)
         {
+            Console.WriteLine($"Section: {JsonConvert.SerializeObject(section)}");
+
             var graphic = section.Graphic;
-            if(graphic == null || string.IsNullOrWhiteSpace(graphic.Content))
+            if((graphic == null || (string.IsNullOrWhiteSpace(graphic.Content) && graphic.Pixels == null)))
             {
-                throw new ArgumentException("The section must have a graphic and concent.");
+                throw new ArgumentException("The section must have a graphic and content or have pixels.");
             }
 
             switch(graphic.Type)
             {
-                case GraphicType.Text:
+                case GraphicType.Pixels:                
+                    canvas = DrawPixelsOnCanvas(canvas, graphic.Pixels, section.Start, section.End);
+                    break;
+                case GraphicType.Text:                
                     canvas = DrawTextOnCanvas(canvas, graphic.Content, section.Start, section.End);
                     break;
                 case GraphicType.Image:
@@ -50,6 +56,21 @@ public class PixelSharpMatrix : IPixelSharpMatrix
         canvas = SwapCanvas(canvas);
     }
 
+    private RGBLedCanvas DrawPixelsOnCanvas(RGBLedCanvas canvas, RenderPixel[]? pixels, RenderPoint? start, RenderPoint? end)
+    {
+        if(pixels == null || pixels.Length == 0)
+        {
+            throw new ArgumentException("The section must have at least one pixel.");
+        }
+
+        foreach(var pixel in pixels)
+        {
+            canvas.SetPixel(pixel.X, pixel.Y, new Color(pixel.R, pixel.G, pixel.B));
+        }
+
+        return canvas;
+    }
+
     public void DrawText(string text, CancellationToken cancellationToken)
     {
         text = text ?? "This is a static text.";
@@ -58,14 +79,6 @@ public class PixelSharpMatrix : IPixelSharpMatrix
         var font = new RGBLedFont("fonts/6x10.bdf");
 
         canvas = DrawTextOnCanvas(canvas, text, new RenderPoint(1, 6), null);
-
-        // var textLength = canvas.DrawText(font, 1, 6, new Color(0, 255, 0), text);
-
-        // canvas = _matrix.CreateOffscreenCanvas();
-
-        // canvas.Clear();
-
-        // canvas.DrawText(font, 0, 20, new Color(0, 255, 0), text);
 
         canvas = SwapCanvas(canvas);
     }
@@ -156,11 +169,9 @@ public class PixelSharpMatrix : IPixelSharpMatrix
         var height = end.Y - start.Y;
         var width = end.X - start.X;
 
-        var image = GraphicsHelper.GetBitmapFromUrl(imageUrl, height, width).Result;
+        var image = GraphicsHelper.GetBitmapFromUrl(imageUrl, width, height).Result;
 
-        canvas = _matrix.CreateOffscreenCanvas();
-
-        canvas = DrawBitmapOnCanvas(canvas, image, start.X, start.Y);
+        canvas = DrawBitmapOnCanvas(canvas, image, start, end);
 
         return canvas;
     }
@@ -172,29 +183,31 @@ public class PixelSharpMatrix : IPixelSharpMatrix
         var textLength = canvas.DrawText(font, start.X, start.Y, new Color(0, 255, 0), text);
 
         // TODO make text as big as fits in the section
-
-        canvas = _matrix.CreateOffscreenCanvas();
         canvas.DrawText(font, start.X, start.Y, new Color(0, 255, 0), text);
 
         return canvas;
     }
 
-
-
-    private RGBLedCanvas DrawBitmapOnCanvas(RGBLedCanvas canvas, SKBitmap bitmap, int startX = 0, int startY = 0)
+    private RGBLedCanvas DrawBitmapOnCanvas(RGBLedCanvas canvas, SKBitmap bitmap, RenderPoint? start = null, RenderPoint? end = null)
     {
         // Loop through the pixels of the image and set the corresponding pixel in the RGBLedMatrix canvas
-        var xOffset = (canvas.Width - bitmap.Width) / 2;
-        var yOffset = (canvas.Height - bitmap.Height) / 2;
+        var width = end?.X - start?.X ?? canvas.Width;
+        var height = end?.Y - start?.Y ?? canvas.Height;
+
+        var xOffset = (width - bitmap.Width) / 2;
+        var yOffset = (height - bitmap.Height) / 2;
+
+        var startX = start?.X ?? 0;
+        var startY = start?.Y ?? 0;
 
         // Loop through the pixels of the image and set the corresponding pixel in the RGBLedMatrix canvas
-        for (var y = startY; y < bitmap.Height; ++y)
+        for (var y = 0; y < bitmap.Height; ++y)
         {
-            for (var x = startX; x < bitmap.Width; ++x)
+            for (var x = 0; x < bitmap.Width; ++x)
             {
                 var pixel = bitmap.GetPixel(x, y);
 
-                canvas.SetPixel(x + xOffset, y + yOffset, new Color(pixel.Red, pixel.Green, pixel.Blue));
+                canvas.SetPixel(x + xOffset + startX, y + yOffset + startY, new Color(pixel.Red, pixel.Green, pixel.Blue));
             }
         }
 

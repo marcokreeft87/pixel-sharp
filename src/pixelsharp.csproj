@@ -20,11 +20,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="2.88.3" />
   </ItemGroup>
 
   <ItemGroup>
-    <AssetsSourceFiles Include="fonts/**/*.*"/>
+    <AssetsSourceFiles Include="fonts/**/*.*" />
   </ItemGroup>
 
   <Target Name="CopyCustomContent" AfterTargets="AfterBuild">

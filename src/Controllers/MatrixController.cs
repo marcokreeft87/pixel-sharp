@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 public class MatrixController : Controller
 {
@@ -19,18 +20,85 @@ public class MatrixController : Controller
     public void ScrollText([FromQuery] string text, CancellationToken cancellationToken) => _matrix.ScrollText(text, cancellationToken);  
 
     [HttpPost("matrix/render")]
-    public void Render([FromBody] RenderRequest request, CancellationToken cancellationToken) 
+    public string Render([FromBody] RenderRequest request, CancellationToken cancellationToken) 
     {
+        /*
+        {
+            "Width": 64,
+            "Height": 64,
+            "Sections": [
+                {
+                    "Start": {
+                        "X": 1,
+                        "Y": 10
+                    },
+                    "End": {
+                        "X": 64,
+                        "Y": 20
+                    },
+                    "Graphic": {
+                        "Type": 0,
+                        "Content": "Itsa me"
+                    }
+                },
+                {
+                    "Start": {
+                        "X": 1,
+                        "Y": 18
+                    },
+                    "End": {
+                        "X": 64,
+                        "Y": 18
+                    },
+                    "Graphic": {
+                        "Type": 0,
+                        "Content": "MARIO!!"
+                    }
+                },
+                {
+                    "Start": {
+                        "X": 1,
+                        "Y": 28
+                    },
+                    "End": {
+                        "X": 32,
+                        "Y": 64
+                    },
+                    "Graphic": {
+                        "Type": 1,
+                        "Content": "https://mario.wiki.gallery/images/8/89/MPS_Toad_Artwork.png"
+                    }
+                },
+                {
+                    "Start": {
+                        "X": 33,
+                        "Y": 28
+                    },
+                    "End": {
+                        "X": 64,
+                        "Y": 64
+                    },
+                    "Graphic": {
+                        "Type": 1,
+                        "Content": "https://mario.wiki.gallery/images/3/3e/MPSS_Mario.png"
+                    }
+                }
+            ]
+        }
+
+        */
+
         // Check if request is the correct dimensions
         if (request.Width != _matrix.Width || request.Height != _matrix.Height)
         {
             // If not, return a 400 Bad Request
             Response.StatusCode = 400;
             Response.WriteAsync($"The request must be {_matrix.Width}x{_matrix.Height}.");
-            return;
+            return null;
         }
 
         // Render the request
         _matrix.Render(request, cancellationToken);
+        return JsonConvert.SerializeObject(request);
     }
 }
