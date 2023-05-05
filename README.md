@@ -20,7 +20,7 @@ wget -O - https://raw.githubusercontent.com/pjgpetecodes/dotnet7pi/main/install.
 3. Clone this project in the folder you want
 4. Run the following command to build an run the project
 ```
-sudo dotnet run [Your chosen folder]/src
+sudo dotnet run [Your chosen folder]/src --urls="http://*:5000"
 ```
 
 ## Troubleshooting
