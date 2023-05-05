@@ -17,9 +17,9 @@ The colors of the columns are the colors of the rainbow cable.
 wget -O - https://raw.githubusercontent.com/pjgpetecodes/dotnet7pi/main/install.sh | sudo bash
 ```
 2. Clone this project in the folder you want
-3. Run the following command to build an run the project
+3. Run the following command to build an run the project from [Your chosen folder]/src
 ```
-sudo dotnet run [Your chosen folder]/src --urls="http://*:5000"
+sudo dotnet run --urls="http://*:5000"
 ```
 
 ## Troubleshooting
