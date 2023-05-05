@@ -17,7 +17,28 @@ The colors of the columns are the colors of the rainbow cable.
 ```
 wget -O - https://raw.githubusercontent.com/pjgpetecodes/dotnet7pi/main/install.sh | sudo bash
 ```
+3. Clone this project in the folder you want
+4. Run the following command to build an run the project
+```
+sudo dotnet run [Your chosen folder]/src
+```
 
+## Troubleshooting
+If you get the following error
+![image](https://user-images.githubusercontent.com/10223677/236404600-54339297-fe1c-4ae9-9478-cb256b3e1457.png)
+
+Follow these steps:
+``
+cd ../..
+cd /etc/modprobe.d
+sudo nano raspi-blacklist.conf
+``
+And type the following in the editor
+```
+blacklist snd_bcm2835
+```
+Exit and save changes.
+Now you will need to reboot the pi and it should be working for you.
 
 ## TODO
 - [x] Support for gif
