@@ -12,13 +12,12 @@ The colors of the columns are the colors of the rainbow cable.
 ![Untitled](https://user-images.githubusercontent.com/10223677/234552571-4b43de64-0d37-49ad-addc-ccd331c9f193.png)
 
 ## Software
-1. Install [rpi-rgb-led-matrix](https://github.com/hzeller/rpi-rgb-led-matrix/tree/master)
-2. Install .NET 7 with the following command
+1. Install .NET 7 with the following command
 ```
 wget -O - https://raw.githubusercontent.com/pjgpetecodes/dotnet7pi/main/install.sh | sudo bash
 ```
-3. Clone this project in the folder you want
-4. Run the following command to build an run the project
+2. Clone this project in the folder you want
+3. Run the following command to build an run the project
 ```
 sudo dotnet run [Your chosen folder]/src --urls="http://*:5000"
 ```
