@@ -13,9 +13,12 @@ public class PixelSharpMatrix : IPixelSharpMatrix
 
     public PixelSharpMatrix(IConfiguration configuration)
     {
-        (_ledRows, _ledColumns) = GetDimensionsFromConfiguration(configuration);
+        var displaySettings = GetDimensionsFromConfiguration(configuration);
 
-        _matrix = GetMatrix(_ledRows, _ledColumns);
+        _ledColumns = displaySettings.LedColumns;
+        _ledRows = displaySettings.LedRows;
+
+        _matrix = GetMatrix(displaySettings);
     }
 
     public void Render(RenderRequest request, CancellationToken cancellationToken)
@@ -260,28 +263,31 @@ public class PixelSharpMatrix : IPixelSharpMatrix
         return canvas;
     }
 
-    private RGBLedMatrix GetMatrix(int rows, int columns) 
+    private RGBLedMatrix GetMatrix(PixelDisplaySettings pixelDisplaySettings)
     {
         var options = new RGBLedMatrixOptions() 
         {
-            Rows = rows,
-            Cols = columns,
+            Rows = pixelDisplaySettings.LedRows,
+            Cols = pixelDisplaySettings.LedColumns,
             ChainLength = 1,
             Parallel = 1,
             GpioSlowdown = 4,
             Brightness = 100
         };
 
-        return new RGBLedMatrix(options);        
+        if(!string.IsNullOrWhiteSpace(pixelDisplaySettings.HardwareMapping))
+            options.HardwareMapping = pixelDisplaySettings.HardwareMapping;
+
+        return new RGBLedMatrix(options);
     }
 
-    private (int rows, int columns) GetDimensionsFromConfiguration(IConfiguration configuration)
+    private PixelDisplaySettings GetDimensionsFromConfiguration(IConfiguration configuration)
     {
         var pixelDisplaySettings = configuration.GetSection("PixelDisplaySettings").Get<PixelDisplaySettings>();
 
         if(pixelDisplaySettings == null)
             throw new Exception("PixelDisplaySettings is null");
 
-        return (pixelDisplaySettings.LedRows, pixelDisplaySettings.LedColumns);
+        return pixelDisplaySettings;
     }
 }
