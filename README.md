@@ -27,11 +27,11 @@ If you get the following error
 ![image](https://user-images.githubusercontent.com/10223677/236404600-54339297-fe1c-4ae9-9478-cb256b3e1457.png)
 
 Follow these steps:
-``
+```
 cd ../..
 cd /etc/modprobe.d
 sudo nano raspi-blacklist.conf
-``
+```
 And type the following in the editor
 ```
 blacklist snd_bcm2835
