@@ -64,8 +64,8 @@ public class PixelSharpMatrix : IPixelSharpMatrix
             }
         }
 
-        // Draw the gif section last because of the animation
-        canvas = DrawGifSection(request, canvas, cancellationToken);
+        // Draw the gif section last because of the animation NOT YET SUPPORTED
+        //canvas = DrawGifSection(request, canvas, cancellationToken);
 
         canvas = SwapCanvas(canvas);
     }
@@ -186,7 +186,7 @@ public class PixelSharpMatrix : IPixelSharpMatrix
         {
             for(var i = 0; i < frames.Count; i++)
             {
-                canvas = DrawBitmapOnCanvas(canvas, frames[i]);
+                canvas = DrawBitmapOnCanvas(canvas, frames[i], start, end);
                 canvas = SwapCanvas(canvas);
 
                 Thread.Sleep(durations[i]);
