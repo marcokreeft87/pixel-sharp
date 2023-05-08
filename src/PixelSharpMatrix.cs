@@ -121,6 +121,26 @@ public class PixelSharpMatrix : IPixelSharpMatrix
         canvas = DrawGifOnCanvas(canvas, imageUrl, new RenderPoint(0, 0), new RenderPoint(_ledRows, _ledColumns), cancellationToken);
     }
 
+    public void DrawGifFromBase64(string base64string, CancellationToken cancellationToken)
+    {
+        base64string = base64string.Split(',').Last();
+
+        var canvas = _matrix.CreateOffscreenCanvas();
+        canvas = DrawGifOnCanvas(canvas, base64string, new RenderPoint(0, 0), new RenderPoint(_ledRows, _ledColumns), cancellationToken);
+    }
+
+    public void DrawBitmapFromBase64(string base64string)
+    {
+        base64string = base64string.Split(',').Last();
+
+        var bitmap = GraphicsHelper.GetBitmapFromBase64(base64string, _ledRows, _ledColumns);
+
+        var canvas = _matrix.CreateOffscreenCanvas();
+        canvas = DrawBitmapOnCanvas(canvas, bitmap);
+
+        SwapCanvas(canvas);
+    }
+
     public void DrawBitmapFromUrl(string imageUrl)
     {
         var bitmap = GraphicsHelper.GetBitmapFromUrl(imageUrl, _ledRows, _ledColumns).Result;
@@ -180,7 +200,7 @@ public class PixelSharpMatrix : IPixelSharpMatrix
 
     private RGBLedCanvas DrawGifOnCanvas(RGBLedCanvas canvas, string imageUrl, RenderPoint start, RenderPoint end, CancellationToken cancellationToken)
     {
-        (List<SKBitmap> frames, List<int> durations) = GraphicsHelper.GetGifFromUrl(imageUrl, end.Y - start.Y, end.X - start.X);
+        (List<SKBitmap> frames, List<int> durations) = GraphicsHelper.IsBase64String(imageUrl) ? GraphicsHelper.GetGifFromBase64(imageUrl, end.Y - start.Y, end.X - start.X)  : GraphicsHelper.GetGifFromUrl(imageUrl, end.Y - start.Y, end.X - start.X);
 
         while(!cancellationToken.IsCancellationRequested)
         {
@@ -218,7 +238,7 @@ public class PixelSharpMatrix : IPixelSharpMatrix
         var height = end.Y - start.Y;
         var width = end.X - start.X;
 
-        var image = GraphicsHelper.GetBitmapFromUrl(imageUrl, width, height).Result;
+        var image = GraphicsHelper.IsBase64String(imageUrl) ? GraphicsHelper.GetBitmapFromBase64(imageUrl, width, height) :  GraphicsHelper.GetBitmapFromUrl(imageUrl, width, height).Result;
 
         canvas = DrawBitmapOnCanvas(canvas, image, start, end);
 
