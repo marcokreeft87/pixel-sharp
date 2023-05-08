@@ -129,5 +129,5 @@ With POST body:
 - [ ] RenderRequest lowercase
 - [x] Pass pixels in a render section
 - [ ] Gif support for render section
-- [ ] Add image/gif base64 support for render and image endpoint
+- [x] Add image/gif base64 support for render and image endpoint
 - [ ] Back to default state
