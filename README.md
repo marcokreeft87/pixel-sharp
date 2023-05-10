@@ -124,6 +124,7 @@ With POST body:
 - [x] Support for gif
 - [x] Support for text
 - [x] Boot screen
+- [ ] App in MAUI
 - [ ] Clock
 - [ ] Weather
 - [ ] RenderRequest lowercase
