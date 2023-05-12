@@ -12,15 +12,19 @@ public class PixelSharpMatrix : IPixelSharpMatrix
     public int Width => _ledRows;
     public int Height => _ledColumns;
 
+    public PixelDisplaySettings DisplaySettings { get; }
+
     public PixelSharpMatrix(IConfiguration configuration)
     {
-        var displaySettings = ConfigurationHelper.GetSettingsFromConfiguration(configuration);
+        DisplaySettings = ConfigurationHelper.GetSettingsFromConfiguration(configuration);
 
-        _ledColumns = displaySettings.LedColumns;
-        _ledRows = displaySettings.LedRows;
+        _ledColumns = DisplaySettings.LedColumns;
+        _ledRows = DisplaySettings.LedRows;
 
-        _matrix = GetMatrix(displaySettings);
+        _matrix = GetMatrix(DisplaySettings);
     }
+
+    public RGBLedCanvas CreateCanvas() => _matrix.CreateOffscreenCanvas();
 
     public void Render(RenderRequest request, CancellationToken cancellationToken)
     {
@@ -246,7 +250,7 @@ public class PixelSharpMatrix : IPixelSharpMatrix
         return canvas;
     }
 
-    private RGBLedCanvas DrawBitmapOnCanvas(RGBLedCanvas canvas, SKBitmap bitmap, RenderPoint? start = null, RenderPoint? end = null)
+    public RGBLedCanvas DrawBitmapOnCanvas(RGBLedCanvas canvas, SKBitmap bitmap, RenderPoint? start = null, RenderPoint? end = null)
     {
         // Loop through the pixels of the image and set the corresponding pixel in the RGBLedMatrix canvas
         var width = end?.X - start?.X ?? canvas.Width;

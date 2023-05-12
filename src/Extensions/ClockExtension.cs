@@ -1,65 +1,100 @@
 ﻿using rpi_rgb_led_matrix_sharp;
+using SkiaSharp;
 
 namespace PixelSharp.Extensions;
 
 public static class ClockExtension
 {
-    public static RGBLedCanvas DrawHands(this IPixelSharpMatrix matrix, RGBLedCanvas canvas)
+    public static void DrawClock(this IPixelSharpMatrix matrix, RGBLedCanvas matrixCanvas)
     {
-        // Draw the hour hand
-        DrawHourHand(matrix, canvas);
+        // Create a new bitmap image using SkiaSharp
+        var image = new SKBitmap(matrix.Width, matrix.Height);
+        using (SKCanvas canvas = new SKCanvas(image))
+        {
+            // Clear the canvas with black color
+            canvas.Clear(SKColors.Black);
 
-        // Draw the minute hand
-        DrawMinuteHand(matrix, canvas);
+            var centerX = matrix.Width / 2;
+            var centerY = matrix.Height / 2;
 
-        return matrix.SwapCanvas(canvas);
+            // Draw the clock circle
+            var clockSettings = matrix.DisplaySettings.ClockSettings;
+            var clockColor = new SKColor((byte)clockSettings.ClockColor.R, (byte)clockSettings.ClockColor.G, (byte)clockSettings.ClockColor.B);
+            using (SKPaint clockCirclePaint = new SKPaint() { Color = clockColor, Style = SKPaintStyle.Stroke, StrokeWidth = 2 })
+            {
+                canvas.DrawCircle(centerX, centerY, (float)(matrix.Height / 2.2), clockCirclePaint);
+            }
+
+            // Draw the hour markers
+            DrawHourMarkers(matrix, canvas);
+
+            // Draw the clock hands
+            DrawHands(matrix, canvas, centerX, centerY);
+
+            // Draw seconds hand
+            if(matrix.DisplaySettings.ClockSettings.ShowSecondHand)
+                DrawSecondsHand(matrix, canvas, centerX, centerY);
+        }
+
+        matrix.DrawBitmapOnCanvas(matrixCanvas, image);
+
+        matrix.SwapCanvas(matrixCanvas);
     }
 
-    public static RGBLedCanvas DrawClock(this IPixelSharpMatrix matrix)
+    private static void DrawSecondsHand(IPixelSharpMatrix matrix, SKCanvas canvas, int centerX, int centerY)
     {
-        // Draw the clock face
-        var canvas = matrix.DrawCircle(0, 0, matrix.Width / 2, new Color(255, 255, 255));
+        var now = DateTime.Now;
+        var secondsAngle = now.Second * Math.PI / 30;
+        var secondsX = (int)(centerX + (double)matrix.Width / 2.2 * Math.Sin(secondsAngle));
+        var secondsY = (int)(centerY + (double)matrix.Height / 2.2 * -Math.Cos(secondsAngle));
 
-        // Draw the hour markers
-        canvas = DrawHourMarkers(matrix, canvas);
-
-        return canvas;
+        var clockSettings = matrix.DisplaySettings.ClockSettings;
+        var secopndColor = new SKColor((byte)clockSettings.SecondHandColor.R, (byte)clockSettings.SecondHandColor.G, (byte)clockSettings.SecondHandColor.B);
+        using (SKPaint secondsHandPaint = new SKPaint() { Color = secopndColor, StrokeWidth = 2 })
+        {
+            canvas.DrawLine(centerX, centerY, secondsX, secondsY, secondsHandPaint);
+        }
     }
 
-    private static RGBLedCanvas DrawHourMarkers(IPixelSharpMatrix matrix, RGBLedCanvas canvas)
+    private static void DrawHourMarkers(IPixelSharpMatrix matrix, SKCanvas canvas)
     {
-        for (var i = 0; i < 12; i++)
+        var clockSettings = matrix.DisplaySettings.ClockSettings;
+        var clockColor = new SKColor((byte)clockSettings.ClockColor.R, (byte)clockSettings.ClockColor.G, (byte)clockSettings.ClockColor.B);
+
+        for (int i = 0; i < 12; i++)
         {
             var angle = i * 30;
             var x = (int)(Math.Cos(angle * (Math.PI / 180)) * (matrix.Width / 2) * 0.9);
             var y = (int)(Math.Sin(angle * (Math.PI / 180)) * (matrix.Height / 2) * 0.9);
-            canvas.SetPixel(x + (matrix.Width / 2), y + (matrix.Height / 2), new Color(255, 255, 255));
+
+            using (SKPaint hourMarkerPaint = new SKPaint() { Color = clockColor, StrokeWidth = 2 })
+            {
+                canvas.DrawPoint(x + (matrix.Width / 2), y + (matrix.Height / 2), hourMarkerPaint);
+            }
         }
-
-        return canvas;
     }
 
-    private static RGBLedCanvas DrawHourHand(IPixelSharpMatrix matrix, RGBLedCanvas canvas)
+    private static void DrawHands(IPixelSharpMatrix matrix, SKCanvas canvas, int centerX, int centerY)
     {
-        var hour = DateTime.Now.Hour;
-        var hourAngle = (hour * 30) + (DateTime.Now.Minute / 2);
-        var hourX = (int)(Math.Cos(hourAngle * (Math.PI / 180)) * (matrix.Width / 2) * 0.75);
-        var hourY = (int)(Math.Sin(hourAngle * (Math.PI / 180)) * (matrix.Height / 2) * 0.75);
+        var now = DateTime.Now;
+        var hourAngle = (now.Hour % 12 + now.Minute / 60.0) * Math.PI / 6;
+        var minuteAngle = now.Minute * Math.PI / 30;
+        var hourX = (int)(centerX + (double)matrix.Width / 3 * Math.Sin(hourAngle));
+        var hourY = (int)(centerY + (double)matrix.Height / 3 * -Math.Cos(hourAngle));
+        var minuteX = (int)(centerX + (double)matrix.Width / 2.2 * Math.Sin(minuteAngle));
+        var minuteY = (int)(centerY + (double)matrix.Height / 2.2 * -Math.Cos(minuteAngle));
 
-        canvas.DrawLine(matrix.Width / 2, matrix.Height / 2, hourX, hourY, new Color(255, 255, 255));
-
-        return canvas;
-    }
-
-    private static RGBLedCanvas DrawMinuteHand(IPixelSharpMatrix matrix, RGBLedCanvas canvas)
-    {
-        var minute = DateTime.Now.Minute;
-        var minuteAngle = minute * 6;
-        var minuteX = (int)(Math.Cos(minuteAngle * (Math.PI / 180)) * (matrix.Width / 2) * 0.9);
-        var minuteY = (int)(Math.Sin(minuteAngle * (Math.PI / 180)) * (matrix.Height / 2) * 0.9);
-
-        canvas.DrawLine(matrix.Width / 2, matrix.Height / 2, minuteX, minuteY, new Color(255, 255, 255));
-
-        return canvas;
+        var clockSettings = matrix.DisplaySettings.ClockSettings;
+        var hourColor = new SKColor((byte)clockSettings.HourHandColor.R, (byte)clockSettings.HourHandColor.G, (byte)clockSettings.HourHandColor.B);
+        using (SKPaint hourHandPaint = new SKPaint() { Color = hourColor, StrokeWidth = 2 })
+        {
+            canvas.DrawLine(centerX, centerY, hourX, hourY, hourHandPaint);
+        }
+        
+        var minuteColor = new SKColor((byte)clockSettings.MinuteHandColor.R, (byte)clockSettings.MinuteHandColor.G, (byte)clockSettings.MinuteHandColor.B);
+        using (SKPaint minuteHandPaint = new SKPaint() { Color = minuteColor, StrokeWidth = 2 })
+        {
+            canvas.DrawLine(centerX, centerY, minuteX, minuteY, minuteHandPaint);
+        }
     }
 }
