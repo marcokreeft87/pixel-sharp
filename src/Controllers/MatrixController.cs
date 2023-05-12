@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
+namespace PixelSharp.Controllers;
+
 public class MatrixController : Controller
 {
     private readonly IPixelSharpMatrix _matrix;
