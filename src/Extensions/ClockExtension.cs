@@ -25,6 +25,12 @@ public static class ClockExtension
                 canvas.DrawCircle(centerX, centerY, (float)(matrix.Height / 2.2), clockCirclePaint);
             }
 
+            // Draw date text small and on the bottom center of the screen
+            var dateText = DateTime.Now.ToString("dd MMM");
+            var dateTextPaint = new SKPaint() { Color = clockColor, TextSize = 10 };
+            var dateTextWidth = dateTextPaint.MeasureText(dateText);
+            canvas.DrawText(dateText, centerX - dateTextWidth / 2, matrix.Height - 15, dateTextPaint);                       
+
             // Draw the hour markers
             DrawHourMarkers(matrix, canvas);
 
