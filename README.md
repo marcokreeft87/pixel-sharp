@@ -40,6 +40,9 @@ Exit and save changes.
 Now you will need to reboot the pi and it should be working for you.
 
 ## Usage
+I've added Swagger to this project for easy API exploration.
+
+The endpoint is : http://[Raspberry PI]:5000/swagger
 
 ### Render image on display
 http://[Raspberry PI]:5000/matrix/image?imageUrl=[URL to image]
