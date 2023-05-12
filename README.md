@@ -125,10 +125,11 @@ With POST body:
 - [x] Support for text
 - [x] Boot screen
 - [ ] App in MAUI
-- [ ] Clock
+- [x] Clock
 - [ ] Weather
 - [ ] RenderRequest lowercase
 - [x] Pass pixels in a render section
 - [ ] Gif support for render section
 - [x] Add image/gif base64 support for render and image endpoint
 - [ ] Back to default state
+- [ ] Fire and forget
