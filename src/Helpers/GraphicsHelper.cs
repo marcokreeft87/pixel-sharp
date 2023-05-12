@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using SkiaSharp;
 
 public static class GraphicsHelper 
@@ -20,10 +21,39 @@ public static class GraphicsHelper
         return ResizeBitmap(screenWidth, screenHeight, bitmap);
     }  
 
+    public static SKBitmap GetBitmapFromBase64(string base64String, int screenWidth, int screenHeight)
+    {
+        // Convert base64 string to byte[]
+        var bytes = Convert.FromBase64String(base64String);
+
+        // Convert byte[] to bitmap
+        using var stream = new MemoryStream(bytes);
+        var bitmap = SKBitmap.Decode(stream);
+
+        return ResizeBitmap(screenWidth, screenHeight, bitmap);
+    }
+
     public static (List<SKBitmap> frames, List<int> durations) GetGifFromUrl(string url, int screenWidth, int screenHeight)
     {
         using var client = new HttpClient();
-        using var response = client.GetAsync(url).Result.Content.ReadAsStream();
+        using var stream = client.GetAsync(url).Result.Content.ReadAsStream();
+
+        return GetGifFromStream(screenWidth, screenHeight, stream);
+    }
+
+    public static (List<SKBitmap> frames, List<int> durations) GetGifFromBase64(string base64String, int screenWidth, int screenHeight)
+    {
+         // Convert base64 string to byte[]
+        var bytes = Convert.FromBase64String(base64String);
+
+        // Convert byte[] to bitmap
+        using var stream = new MemoryStream(bytes);
+        
+        return GetGifFromStream(screenWidth, screenHeight, stream);
+    }
+
+    private static (List<SKBitmap> frames, List<int> durations) GetGifFromStream(int screenWidth, int screenHeight, Stream response)
+    {
         using (var codec = SKCodec.Create(response))
         {
             var frameCount = codec.FrameCount;
@@ -38,7 +68,7 @@ public static class GraphicsHelper
             var frameLengths = new List<int>();
 
             for (int i = 0; i < count; i++)
-            {   
+            {
                 var opts = new SKCodecOptions(i);
 
                 if (codec?.GetPixels(info, bitmap.GetPixels(), opts) == SKCodecResult.Success)
@@ -51,10 +81,10 @@ public static class GraphicsHelper
                     frameLengths.Add(codec.FrameInfo[i].Duration);
                 }
             }
-            
+
             return (frames, frameLengths);
         }
-    }  
+    }
 
     private static SKBitmap ResizeBitmap(int screenWidth, int screenHeight, SKBitmap bitmap)
     {
@@ -100,5 +130,11 @@ public static class GraphicsHelper
             targetWidth = imageWidth;
             targetHeight = imageHeight;
         }
+    }
+
+    public static bool IsBase64String(string base64)
+    {
+        base64 = base64.Trim();
+        return (base64.Length % 4 == 0) && Regex.IsMatch(base64, @"^[a-zA-Z0-9\+/]*={0,3}$", RegexOptions.None);
     }
 }

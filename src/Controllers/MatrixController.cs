@@ -14,6 +14,12 @@ public class MatrixController : Controller
 
     [HttpGet("matrix/image")]
     public void RenderImage([FromQuery] string imageUrl) => _matrix.DrawBitmapFromUrl(imageUrl);
+
+    [HttpPost("matrix/image64")]
+    public void RenderBase64([FromBody] string base64String) => _matrix.DrawBitmapFromBase64(base64String);
+
+    [HttpPost("matrix/gif64")]
+    public void RenderGifBase64([FromBody] string base64String, CancellationToken cancellationToken) => _matrix.DrawGifFromBase64(base64String, cancellationToken);
     
     [HttpGet("matrix/text")]
     public void RenderText([FromQuery] string text, CancellationToken cancellationToken) => _matrix.DrawText(text, cancellationToken);  

@@ -69,8 +69,8 @@ public class PixelSharpMatrix : IPixelSharpMatrix
             }
         }
 
-        // Draw the gif section last because of the animation
-        canvas = DrawGifSection(request, canvas, cancellationToken);
+        // Draw the gif section last because of the animation NOT YET SUPPORTED
+        //canvas = DrawGifSection(request, canvas, cancellationToken);
 
         SwapCanvas(canvas);
     }
@@ -124,6 +124,26 @@ public class PixelSharpMatrix : IPixelSharpMatrix
         var canvas = _matrix.CreateOffscreenCanvas();
 
         DrawGifOnCanvas(canvas, imageUrl, new RenderPoint(0, 0), new RenderPoint(_ledRows, _ledColumns), cancellationToken);
+    }
+
+    public void DrawGifFromBase64(string base64string, CancellationToken cancellationToken)
+    {
+        base64string = base64string.Split(',').Last();
+
+        var canvas = _matrix.CreateOffscreenCanvas();
+        canvas = DrawGifOnCanvas(canvas, base64string, new RenderPoint(0, 0), new RenderPoint(_ledRows, _ledColumns), cancellationToken);
+    }
+
+    public void DrawBitmapFromBase64(string base64string)
+    {
+        base64string = base64string.Split(',').Last();
+
+        var bitmap = GraphicsHelper.GetBitmapFromBase64(base64string, _ledRows, _ledColumns);
+
+        var canvas = _matrix.CreateOffscreenCanvas();
+        canvas = DrawBitmapOnCanvas(canvas, bitmap);
+
+        SwapCanvas(canvas);
     }
 
     public void DrawBitmapFromUrl(string imageUrl)
@@ -193,13 +213,13 @@ public class PixelSharpMatrix : IPixelSharpMatrix
 
     private RGBLedCanvas DrawGifOnCanvas(RGBLedCanvas canvas, string imageUrl, RenderPoint start, RenderPoint end, CancellationToken cancellationToken)
     {
-        (List<SKBitmap> frames, List<int> durations) = GraphicsHelper.GetGifFromUrl(imageUrl, end.Y - start.Y, end.X - start.X);
+        (List<SKBitmap> frames, List<int> durations) = GraphicsHelper.IsBase64String(imageUrl) ? GraphicsHelper.GetGifFromBase64(imageUrl, end.Y - start.Y, end.X - start.X)  : GraphicsHelper.GetGifFromUrl(imageUrl, end.Y - start.Y, end.X - start.X);
 
         while(!cancellationToken.IsCancellationRequested)
         {
             for(var i = 0; i < frames.Count; i++)
             {
-                canvas = DrawBitmapOnCanvas(canvas, frames[i]);
+                canvas = DrawBitmapOnCanvas(canvas, frames[i], start, end);
                 canvas = SwapCanvas(canvas);
 
                 Thread.Sleep(durations[i]);
@@ -231,7 +251,7 @@ public class PixelSharpMatrix : IPixelSharpMatrix
         var height = end.Y - start.Y;
         var width = end.X - start.X;
 
-        var image = GraphicsHelper.GetBitmapFromUrl(imageUrl, width, height).Result;
+        var image = GraphicsHelper.IsBase64String(imageUrl) ? GraphicsHelper.GetBitmapFromBase64(imageUrl, width, height) :  GraphicsHelper.GetBitmapFromUrl(imageUrl, width, height).Result;
 
         canvas = DrawBitmapOnCanvas(canvas, image, start, end);
 
@@ -290,7 +310,17 @@ public class PixelSharpMatrix : IPixelSharpMatrix
 
         if(!string.IsNullOrWhiteSpace(pixelDisplaySettings.HardwareMapping))
             options.HardwareMapping = pixelDisplaySettings.HardwareMapping;
-
+            
         return new RGBLedMatrix(options);
+    }
+
+    private PixelDisplaySettings GetDimensionsFromConfiguration(IConfiguration configuration)
+    {
+        var pixelDisplaySettings = configuration.GetSection("PixelDisplaySettings").Get<PixelDisplaySettings>();
+
+        if(pixelDisplaySettings == null)
+            throw new Exception("PixelDisplaySettings is null");
+
+        return pixelDisplaySettings;
     }
 }
