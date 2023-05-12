@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using PixelSharp.Helpers;
 using rpi_rgb_led_matrix_sharp;
 using SkiaSharp;
 
@@ -13,7 +14,7 @@ public class PixelSharpMatrix : IPixelSharpMatrix
 
     public PixelSharpMatrix(IConfiguration configuration)
     {
-        var displaySettings = GetDimensionsFromConfiguration(configuration);
+        var displaySettings = ConfigurationHelper.GetSettingsFromConfiguration(configuration);
 
         _ledColumns = displaySettings.LedColumns;
         _ledRows = displaySettings.LedRows;
@@ -67,7 +68,7 @@ public class PixelSharpMatrix : IPixelSharpMatrix
         // Draw the gif section last because of the animation
         canvas = DrawGifSection(request, canvas, cancellationToken);
 
-        canvas = SwapCanvas(canvas);
+        SwapCanvas(canvas);
     }
 
     public void DrawText(string text, CancellationToken cancellationToken)
@@ -79,7 +80,7 @@ public class PixelSharpMatrix : IPixelSharpMatrix
 
         canvas = DrawTextOnCanvas(canvas, text, new RenderPoint(1, 6), null);
 
-        canvas = SwapCanvas(canvas);
+        SwapCanvas(canvas);
     }
     public void ScrollText(string text, CancellationToken cancellationToken)
     {
@@ -118,7 +119,7 @@ public class PixelSharpMatrix : IPixelSharpMatrix
     {
         var canvas = _matrix.CreateOffscreenCanvas();
 
-        canvas = DrawGifOnCanvas(canvas, imageUrl, new RenderPoint(0, 0), new RenderPoint(_ledRows, _ledColumns), cancellationToken);
+        DrawGifOnCanvas(canvas, imageUrl, new RenderPoint(0, 0), new RenderPoint(_ledRows, _ledColumns), cancellationToken);
     }
 
     public void DrawBitmapFromUrl(string imageUrl)
@@ -146,6 +147,14 @@ public class PixelSharpMatrix : IPixelSharpMatrix
     {
         canvas = _matrix.SwapOnVsync(canvas);
         canvas.Clear();
+
+        return canvas;
+    }
+
+    public RGBLedCanvas DrawCircle(int x, int y, int radius, Color color)
+    {
+        var canvas = _matrix.CreateOffscreenCanvas();
+        canvas.DrawCircle(x, y, radius, color);
 
         return canvas;
     }
@@ -279,15 +288,5 @@ public class PixelSharpMatrix : IPixelSharpMatrix
             options.HardwareMapping = pixelDisplaySettings.HardwareMapping;
 
         return new RGBLedMatrix(options);
-    }
-
-    private PixelDisplaySettings GetDimensionsFromConfiguration(IConfiguration configuration)
-    {
-        var pixelDisplaySettings = configuration.GetSection("PixelDisplaySettings").Get<PixelDisplaySettings>();
-
-        if(pixelDisplaySettings == null)
-            throw new Exception("PixelDisplaySettings is null");
-
-        return pixelDisplaySettings;
     }
 }

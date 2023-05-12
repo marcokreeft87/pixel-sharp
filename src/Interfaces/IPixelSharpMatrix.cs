@@ -11,4 +11,5 @@ public interface IPixelSharpMatrix
     void DrawBitmapFromUrl(string imageUrl);
     void DrawGifFromUrl(string imageUrl, CancellationToken cancellationToken);
     void Render(RenderRequest request, CancellationToken cancellationToken);
+    RGBLedCanvas DrawCircle(int x, int y, int radius, Color color);
 }
