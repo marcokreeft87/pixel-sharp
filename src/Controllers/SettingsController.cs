@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PixelSharp.Constants;
 using PixelSharp.Helpers;
+using PixelSharp.Settings;
 
 namespace PixelSharp.Controllers;
 

@@ -1,8 +1,8 @@
 ﻿using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json.Linq;
 using PixelSharp.Controllers;
+using PixelSharp.Settings;
 
 namespace tests.Controllers;
 

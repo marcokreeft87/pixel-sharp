@@ -1,34 +1,38 @@
 using Newtonsoft.Json;
 using PixelSharp.Helpers;
+using PixelSharp.Settings;
 using rpi_rgb_led_matrix_sharp;
 using SkiaSharp;
 
 public class PixelSharpMatrix : IPixelSharpMatrix
 {
-    private int _ledRows;
-    private int _ledColumns;
-    private RGBLedMatrix _matrix { get; }
+    private readonly int _ledRows;
+    private readonly int _ledColumns;
+    private RGBLedMatrix Matrix { get; }
 
     public int Width => _ledRows;
     public int Height => _ledColumns;
 
     public PixelDisplaySettings DisplaySettings { get; }
+    public ApplicationSettings ApplicationSettings { get; }
 
     public PixelSharpMatrix(IConfiguration configuration)
     {
         DisplaySettings = ConfigurationHelper.GetSettingsFromConfiguration(configuration);
+        ApplicationSettings = ConfigurationHelper.GetDevelopmentSettings(configuration);
 
         _ledColumns = DisplaySettings.LedColumns;
         _ledRows = DisplaySettings.LedRows;
 
-        _matrix = GetMatrix(DisplaySettings);
+        if(ApplicationSettings.UseMatrix)
+            Matrix = GetMatrix(DisplaySettings);
     }
 
-    public RGBLedCanvas CreateCanvas() => _matrix.CreateOffscreenCanvas();
+    public RGBLedCanvas CreateCanvas() => Matrix.CreateOffscreenCanvas();
 
     public void Render(RenderRequest request, CancellationToken cancellationToken)
     {
-        var canvas = _matrix.CreateOffscreenCanvas();
+        var canvas = Matrix.CreateOffscreenCanvas();
 
         if (request.Sections == null || request.Sections.Length == 0)
         {
@@ -79,7 +83,7 @@ public class PixelSharpMatrix : IPixelSharpMatrix
     {
         text = text ?? "This is a static text.";
 
-        var canvas = _matrix.CreateOffscreenCanvas();
+        var canvas = Matrix.CreateOffscreenCanvas();
         var font = new RGBLedFont("fonts/6x10.bdf");
 
         canvas = DrawTextOnCanvas(canvas, text, new RenderPoint(1, 6), null);
@@ -90,12 +94,12 @@ public class PixelSharpMatrix : IPixelSharpMatrix
     {
         text = text ?? "This is a scrolling text.";
 
-        var canvas = _matrix.CreateOffscreenCanvas();
+        var canvas = Matrix.CreateOffscreenCanvas();
         var font = new RGBLedFont("fonts/6x10.bdf");
 
         var textLength = canvas.DrawText(font, 1, 6, new Color(0, 255, 0), text);
 
-        canvas = _matrix.CreateOffscreenCanvas();
+        canvas = Matrix.CreateOffscreenCanvas();
 
         int animationCount = 0;
 
@@ -121,7 +125,7 @@ public class PixelSharpMatrix : IPixelSharpMatrix
 
     public void DrawGifFromUrl(string imageUrl, CancellationToken cancellationToken)
     {
-        var canvas = _matrix.CreateOffscreenCanvas();
+        var canvas = Matrix.CreateOffscreenCanvas();
 
         DrawGifOnCanvas(canvas, imageUrl, new RenderPoint(0, 0), new RenderPoint(_ledRows, _ledColumns), cancellationToken);
     }
@@ -130,7 +134,7 @@ public class PixelSharpMatrix : IPixelSharpMatrix
     {
         base64string = base64string.Split(',').Last();
 
-        var canvas = _matrix.CreateOffscreenCanvas();
+        var canvas = Matrix.CreateOffscreenCanvas();
         canvas = DrawGifOnCanvas(canvas, base64string, new RenderPoint(0, 0), new RenderPoint(_ledRows, _ledColumns), cancellationToken);
     }
 
@@ -140,7 +144,7 @@ public class PixelSharpMatrix : IPixelSharpMatrix
 
         var bitmap = GraphicsHelper.GetBitmapFromBase64(base64string, _ledRows, _ledColumns);
 
-        var canvas = _matrix.CreateOffscreenCanvas();
+        var canvas = Matrix.CreateOffscreenCanvas();
         canvas = DrawBitmapOnCanvas(canvas, bitmap);
 
         SwapCanvas(canvas);
@@ -150,7 +154,7 @@ public class PixelSharpMatrix : IPixelSharpMatrix
     {
         var bitmap = GraphicsHelper.GetBitmapFromUrl(imageUrl, _ledRows, _ledColumns).Result;
 
-        var canvas = _matrix.CreateOffscreenCanvas();
+        var canvas = Matrix.CreateOffscreenCanvas();
         canvas = DrawBitmapOnCanvas(canvas, bitmap);
 
         SwapCanvas(canvas);
@@ -158,7 +162,7 @@ public class PixelSharpMatrix : IPixelSharpMatrix
 
     public void DrawBitmapFromPath(string path)
     {
-        var canvas = _matrix.CreateOffscreenCanvas();
+        var canvas = Matrix.CreateOffscreenCanvas();
 
         var bitmap = GraphicsHelper.GetBitmapFromPath(path, _ledRows, _ledColumns);
 
@@ -169,7 +173,7 @@ public class PixelSharpMatrix : IPixelSharpMatrix
 
     public RGBLedCanvas SwapCanvas(RGBLedCanvas canvas) 
     {
-        canvas = _matrix.SwapOnVsync(canvas);
+        canvas = Matrix.SwapOnVsync(canvas);
         canvas.Clear();
 
         return canvas;
@@ -177,7 +181,7 @@ public class PixelSharpMatrix : IPixelSharpMatrix
 
     public RGBLedCanvas DrawCircle(int x, int y, int radius, Color color)
     {
-        var canvas = _matrix.CreateOffscreenCanvas();
+        var canvas = Matrix.CreateOffscreenCanvas();
         canvas.DrawCircle(x, y, radius, color);
 
         return canvas;
@@ -310,17 +314,7 @@ public class PixelSharpMatrix : IPixelSharpMatrix
 
         if(!string.IsNullOrWhiteSpace(pixelDisplaySettings.HardwareMapping))
             options.HardwareMapping = pixelDisplaySettings.HardwareMapping;
-            
+
         return new RGBLedMatrix(options);
-    }
-
-    private PixelDisplaySettings GetDimensionsFromConfiguration(IConfiguration configuration)
-    {
-        var pixelDisplaySettings = configuration.GetSection("PixelDisplaySettings").Get<PixelDisplaySettings>();
-
-        if(pixelDisplaySettings == null)
-            throw new Exception("PixelDisplaySettings is null");
-
-        return pixelDisplaySettings;
     }
 }

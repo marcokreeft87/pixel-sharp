@@ -1,3 +1,5 @@
+namespace PixelSharp.Settings;
+
 public class PixelDisplaySettings
 {
     public int LedRows { get; set; }

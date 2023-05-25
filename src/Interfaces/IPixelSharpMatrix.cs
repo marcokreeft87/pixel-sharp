@@ -1,3 +1,4 @@
+using PixelSharp.Settings;
 using rpi_rgb_led_matrix_sharp;
 using SkiaSharp;
 
