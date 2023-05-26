@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using PixelSharp.Controllers;
-using PixelSharp.Settings;
+using PixelSharp.Models;
 
 namespace tests.Controllers;
 

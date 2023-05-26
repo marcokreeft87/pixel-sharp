@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using PixelSharp.Helpers;
+using PixelSharp.Models;
 using PixelSharp.Settings;
 using rpi_rgb_led_matrix_sharp;
 using SkiaSharp;

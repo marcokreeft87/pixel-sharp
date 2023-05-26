@@ -1,3 +1,5 @@
+namespace PixelSharp.Models;
+
 public class ClockSettings 
 {
     public SettingsColor HourHandColor { get; set; } = new SettingsColor { R = 255, G = 0, B = 0 };

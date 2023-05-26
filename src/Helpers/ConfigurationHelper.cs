@@ -1,4 +1,5 @@
 ﻿using PixelSharp.Constants;
+using PixelSharp.Models;
 using PixelSharp.Settings;
 
 namespace PixelSharp.Helpers;

@@ -1,4 +1,4 @@
-using PixelSharp.Settings;
+using PixelSharp.Models;
 using rpi_rgb_led_matrix_sharp;
 using SkiaSharp;
 
