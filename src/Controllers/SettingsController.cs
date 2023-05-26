@@ -18,7 +18,7 @@ public class SettingsController :  Controller
     public PixelDisplaySettings GetSettings() => ConfigurationHelper.GetSettingsFromConfiguration(_configuration);
     
     [HttpPost("settings")]
-    public IActionResult UpdateSettings(PixelDisplaySettings newSettings)
+    public IActionResult UpdateSettings([FromBody] PixelDisplaySettings newSettings)
     {
         var section = _configuration.GetSection(ConfigrationConstants.PixelDisplaySettings);
         section["LedRows"] = newSettings.LedRows.ToString();
