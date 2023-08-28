@@ -135,3 +135,4 @@ With POST body:
 - [x] Add image/gif base64 support for render and image endpoint
 - [ ] Back to default state
 - [ ] Fire and forget
+- [ ] MQTT
